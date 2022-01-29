@@ -117,12 +117,6 @@ if "%func%"=="%class%-dir" (
 set timeout=2& goto eof
 
 
-:lspath
-echo [INFO]執行功能：%func%。>> %logfile%
-echo %path%
-goto eof
-
-
 :mc
 :mc-mod
 :mc-mod-init
@@ -131,25 +125,26 @@ set order=%2
 if "%func%"=="%class%" (
     start "minecraft" %mclauncher%
     set msg=已啟動 Minecraft Launcher。
-) else if "%func%"=="%class%-mod-init" (
-    cd /d %appdata%\.minecraft\mods
-    if not exist cv (echo 0.0.0>cv)
-    dir
-    echo 初始化完成。
-) else if "%func%"=="%class%-mod" (
-    cd /d %appdata%\.minecraft\mods
-    set /p from=<cv
-    if "%from%"=="%order%" (
-        set msg=現在已經在%order%了喔。
-        goto eof
-    )
-    move *.jar %from%
-    cd %order%
-    move *.jar ..
-    cd ..
-    echo %order%>cv
-    cd /d %~dp0
 )
+@REM ) else if "%func%"=="%class%-mod-init" (
+@REM     cd /d %appdata%\.minecraft\mods
+@REM     if not exist cv (echo 0.0.0>cv)
+@REM     dir
+@REM     echo 初始化完成。
+@REM ) else if "%func%"=="%class%-mod" (
+@REM     cd /d %appdata%\.minecraft\mods
+@REM     set /p from=<cv
+@REM     if "%from%"=="%order%" (
+@REM         set msg=現在已經在%order%了喔。
+@REM         goto eof
+@REM     )
+@REM     move *.jar %from%
+@REM     cd %order%
+@REM     move *.jar ..
+@REM     cd ..
+@REM     echo %order%>cv
+@REM     cd /d %~dp0
+@REM )
 set timeout=2& goto eof
 
 
@@ -158,7 +153,6 @@ set timeout=2& goto eof
 :dl-mp4
 :dl-origin
 :dl-youtube-dl-update
-:dl-clear
 set class=dl
 echo [INFO]執行功能：%class%。>> %logfile%
 if not "%3"=="" (
@@ -219,18 +213,18 @@ bin\adb\adb.exe push "%order%" /sdcard/Download
 set timeout=-1& goto eof
 
 
-:ashell
-mode con: cols=150 lines=50
-set class=ashell
-bin\adb\adb.exe shell
-goto eof
-
-
 :apull
 set class=apull
 echo 請稍候。
 bin\adb\adb.exe pull /storage/emulated/0/Download/%order% %outdir%\
 set timeout=-1& goto eofmsg
+
+
+:ashell
+mode con: cols=150 lines=50
+set class=ashell
+bin\adb\adb.exe shell
+goto eof
 
 
 :counter
@@ -338,32 +332,34 @@ set input=& set output=
 set timeout=10 & goto eof
 
 
-:mega
-:meag-UL
-:mega-DL
-:mega-shell
-:mega-kill
-set class=mega
-set MegaCmdClinetExec="C:\Users\Administrator\AppData\class\MEGAcmd\MEGAclient.exe"
-if "%func%"=="%class%-UL" (
-    %MegaCmdClinetExec% put %order% /
-) else if "%func%"=="%class%-DL" (
-    %MegaCmdClinetExec% get %order% %outdir%
-) else if "%func%"=="%class%-shell" (
-    start "MegaCmdShell" %MegaCmdClinetExec:~0,-11%cmdShell.exe
-) else if "%func%"=="%class%-kill" (
-    taskkill -f -im MEGAcmdServer.exe
-    timeout 3 > nul
-) else (
-    set msg=操作不存在。
-)
-set timeout=10& goto eof
+@REM :mega
+@REM :meag-UL
+@REM :mega-DL
+@REM :mega-shell
+@REM :mega-kill
+@REM set class=mega
+@REM set MegaCmdClinetExec="C:\Users\Administrator\AppData\class\MEGAcmd\MEGAclient.exe"
+@REM if "%func%"=="%class%-UL" (
+@REM     %MegaCmdClinetExec% put %order% /
+@REM ) else if "%func%"=="%class%-DL" (
+@REM     %MegaCmdClinetExec% get %order% %outdir%
+@REM ) else if "%func%"=="%class%-shell" (
+@REM     start "MegaCmdShell" %MegaCmdClinetExec:~0,-11%cmdShell.exe
+@REM ) else if "%func%"=="%class%-kill" (
+@REM     taskkill -f -im MEGAcmdServer.exe
+@REM     timeout 3 > nul
+@REM ) else (
+@REM     set msg=操作不存在。
+@REM )
+@REM set timeout=10& goto eof
 
 
 :flow
 :flow-c
 :flow-cpp
 :flow-efi
+:flow-py2
+:flow-py3
 ::目前僅可編譯單一檔案(但寫在檔案裡的不在此限)
 ::switch dir before use
 cd /d %~dp2
@@ -372,25 +368,26 @@ set arg=%3 %4 %5 %6 %7 %8 %9
 ::關於為什麼要用DelayedExpansion及配套的"!"，請見:
 ::https://stackoverflow.com/questions/9102422/windows-batch-set-inside-if-not-working/9102569\::
 ::主要是延遲解釋啦
-set /p = [INFO]正在編譯....<nul
+
 ::模板
 ::(else) if "%func%"=="%class%-語言名稱" (
-::    set target=%~n2.原始碼副檔名    #%~n2是由%2(路徑)所得去掉副檔名的檔案名稱
+::    set target=%~n2.原始碼副檔名    #原始碼檔案
 ::    (set target=%~nx2) #用於語言的源代碼有多種副檔名時
-::    set binary=%~n2.二進位檔副檔名  
-::    set command=編譯指令
+::    set command=gcc/clang/cl... #編譯指令
+::    set execute=%~n2.二進位檔副檔名    #編譯後要執行的命令
 ::)
+
 if "%func%"=="%class%-c" (
     set target=%~n2.c
-    set binary=%~n2.exe
-    set command=gcc !target! -o !binary! %arg%
+    set execute=%~n2.exe
+    set command=gcc !target! -o !execute! %arg%
 ) else if "%func%"=="%class%-cpp" (
     set target=%~nx2
-    set binary=%~n2.exe
-    set command=g++ !target! -o !binary! %arg%
+    set execute=%~n2.exe
+    set command=g++ !target! -o !execute! %arg%
 ) else if "%func%"=="%class%-efi" (
     set target=%~n2.c
-    set binary=%~n2.efi
+    set execute=%~n2.efi
     set command=gcc^
         -Wall^
         -Wextra^
@@ -399,27 +396,51 @@ if "%func%"=="%class%-c" (
         -fno-builtin^
         -e main^
         -Wl,--subsystem,10^
-        -o !binary! !target!
-
+        -o !execute! !target!
+) else if "%func%"=="%class%-py3" (
+        set target=%~n2.py
+        set command=
+        set execute=py -3 !target!
+) else if "%func%"=="%class%-py2" (
+        set target=%~n2.py
+        set command=
+        set execute=py -2 !target!
 ) else (
     echo [ERRS]失敗:指定的語言無效。& goto:eof )
+
 ::-------
-%command%
-::-------
-if "%func%"=="%class%-efi" (
-    set msg=請自行測試.efi檔案。
-    goto eof
-)
-if %errorlevel%==0 (
-  echo ....編譯完成。
-  echo.
-  echo -^|執行%binary%^|-
-  "%binary%"
-  echo -^|執行結束[!errorlevel!]^|-
+:: 判斷是否需要編譯
+if not "%command%"=="" (
+    :: 需要則編譯原始碼
+    set /p = [INFO]正在編譯....<nul
+    %command%
 ) else (
-  echo 編譯失敗。
+    :: 不需要則直接執行手稿
+    echo -^|執行%target%^|-
+    %execute%
+    echo -^|執行結束[!errorlevel!]^|-
+    goto flow.end
 )
-set target=& set command=& set binary=
+::-------
+
+if not "%command%"=="" (
+    if %errorlevel%==0 (
+        ::如果編譯成功
+        echo ....編譯完成。
+        echo.
+        echo -^|執行%execute%^|-
+        ::-------
+        %execute%
+        ::-------
+        echo -^|執行結束[!errorlevel!]^|-
+    ) else (
+        ::如果編譯失敗
+        echo 編譯失敗。
+    )
+)
+
+:flow.end
+set target=& set command=& set execute=
 set timeoout=0& goto:eof
 
 
@@ -444,3 +465,39 @@ cd %ccd%
 endlocal
 
 :help
+echo Fran Utils %ver%
+echo.
+echo 用法：fran [功能] <指令>
+echo.
+echo adb
+echo   adb-dev
+echo   adb-kill
+echo fastboot
+echo   fastboot-dev
+echo self
+echo   self-dir
+echo   self-edit
+echo mc
+echo   mc-mod
+echo   mc-mod-init
+echo dl
+echo   dl-mp3
+echo   dl-mp4
+echo   dl-origin
+echo   dl-youtube-dl-update
+echo apair
+echo apush
+echo apull
+echo ashell
+echo counter
+echo ct
+echo   ct-panel
+echo   ct-spa
+echo   ct-po
+echo ping
+echo real
+echo   real-anime
+echo flow
+echo   flow-c
+echo   flow-cpp
+echo   flow-efi

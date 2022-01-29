@@ -11,9 +11,9 @@ set realesrgandl=https://github.com/xinntao/Real-ESRGAN/releases
 :start
 echo.
 echo 這個安裝程式將會:
-echo   -在本安裝程式所在的目錄建立bin目錄及其子目錄。
+echo   -在本安裝程式所在的目錄建立bin目錄及其子目錄(用於放置第三方工具)
 echo   -協助您下載相關的專案程式。
-timeout 2 > nul
+pause
 
 :CreateDir
 echo.
@@ -27,10 +27,9 @@ mkdir bin\RealESRGAN
 
 :DownloadBinary
 echo.
-echo 由於某些軟體的授權(以及我不想把專案弄得太大)的關係，
-echo 您需要自行下載並解壓縮其他軟體專案的可執行檔(Binary/Executeable)，
-echo 否則這套工具將會像是失去靈魂的空殼一樣沒有作用。
-echo 不過不用擔心，我已經把連結準備好了。
+echo 由於某些軟體的授權，
+echo 您需要自行下載並解壓縮其他軟體專案的可執行檔，
+echo 否則這套工具的絕大多數功能將會失效。
 echo.
 echo 接下來將會開啟以下專案的可執行檔下載頁面:
 echo   -adb(fastboot)
